@@ -35,8 +35,5 @@ function generateIndex() {
                             //     productArticle.appendChild(productDescription)
                 }
         })
-        .catch(function(err) {
-            alert(`Nous rencontrons un problème serveur, veulliez réessayer ultèrieurement.`)
-            console.log(`Veuillez nous excuser, un problème est survenu.`);
-        });
+        .catch((err) => alert(`Nous rencontrons un problème serveur, veulliez réessayer ultèrieurement.`));
 }

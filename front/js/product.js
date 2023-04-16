@@ -9,31 +9,30 @@ async function getProductJson() {
 /*------- Generate and impregnate sheet's html with JSON's data-------*/
 getProductJson()
     .then(function(productJson) {
-        // const product = productJson;
           
-        /*------- Get the container's element -------*/
+        /*------- Get container's element -------*/
         const item = document.querySelector(".item article")
         
-            /*------- Create the image's element -------*/
+            /*------- Create image's element -------*/
             const itemImage = document.querySelector(".item__img")
                 const image = document.createElement("img")
                 image.src = productJson.imageUrl
                 image.alt = productJson.altTxt
                 itemImage.appendChild(image)
             
-            /*------- Fill the name's element -------*/
+            /*------- Fill name's element -------*/
             const itemName = document.querySelector("#title")
             itemName.innerText = productJson.name
             // 
-            /*------- Fill the price's element -------*/
+            /*------- Fill price's element -------*/
             const itemPrice = document.getElementById("price")
             itemPrice.innerText = productJson.price
             
-            /*------- Fill the description's element -------*/
+            /*------- Fill description's element -------*/
             const itemDescription = document.getElementById("description")
             itemDescription.innerText = productJson.description
 
-            /*------- FIll the select field -------*/
+            /*------- FIll select field -------*/
             const itemSelector = document.querySelector("#colors")
             const colorsJson = productJson.colors
             fillOption(itemSelector, colorsJson);
@@ -46,69 +45,47 @@ getProductJson()
                     itemSelector.appendChild(colors)
                 });
             }
-
+        /* ------- Listen to the click on the #addToCart button -------*/
         const addToLocalStorage = document.querySelector("#addToCart")
         addToLocalStorage.addEventListener("click", () => {
-
+            
+            /* ------- Get color's value ------- */
             const colorSelect = document.querySelector("select#colors");
             let color = colorSelect.value;
             
-            const quantitySelect = document.querySelector("input#quantity");
-            let quantity = quantitySelect.value;
+            /* ------- Get quantity's value ------- */
+            const quantityInput = document.querySelector("input#quantity");
+            let quantity = quantityInput.value;
 
-            let cartItem = {
+            /* ------- Create item's object ------- */
+            let selectItem = {
                 "id" : productJson._id,
                 "quantity" : quantity,
                 "color" : color
             };
-            console.log(cartItem)
+            console.log(selectItem)
 
-            // Récupération de la valeur stockée dans le localstorage à partir de la clé "ma_cle"
-            const localStorageContent = localStorage.getItem("item");
-            console.log(localStorageContent)
+            /* ------ Get value stored in localstorage from "item" key ------- */
+            const localStorageContent = JSON.parse(localStorage.getItem("item")) || [];
 
-            // Vérification si la valeur existe
-            if (localStorageContent !== null) {
-                return true
-                console.log("La valeur de ma_cle est:", maValeur);
-            } else {
-                return false
-                console.log("La clé ma_cle n'a pas été trouvée dans le localstorage.");
-            }
+            /* ------ Check if object already exists in localstorage ------- */
+            const existingItem = localStorageContent.find(item => item.id === selectItem.id && item.color === selectItem.color);
 
-            function checkProduct(cartItem) {
-                if (localStorage.filter(id => item.id !== cartItem.id)) {
-                    localStorage.setItem("item", JSON.stringify(cartItem));
+            /* ------- Check if a color and quantity have been chosen  ------- */
+            if (color == "" && quantity == "0") { alert(`Veuillez choisir une couleur et une quantité comprise entre 0 et 100.`)}
+            // if (color == "") { alert(`Veuillez choisir une couleur.`)}
+            // if (quantity < 1 || quantity > 100) { alert(`Veuillez choisir une quantité comprise entre 1 et 100`)}
+            else {
+                if (existingItem) {
+                    existingItem.quantity = parseInt(existingItem.quantity) + parseInt(selectItem.quantity);
+                    console.log(existingItem)
                 } else {
-
+                    localStorageContent.push(selectItem);
                 }
+                /* ------ Updating value in localstorage ------- */
+                localStorage.setItem("item", JSON.stringify(localStorageContent));
             }
-            // const localStorageContent = localStorage.getItem("item");
-            // console.log(localStorageContent)
-
-            // const checkLocalSorage = (cartItem) => {
-            //     if (localStorage.length === 0) {
-            //         return false;
-            //     } else {
-            //         if (localStorageContent.filter(i => i.id !== cartItem.id)) {
-            //             return true
-            //         } else {
-            //             return false
-            //         }
-            //     }
-            // }
-            // if (checkLocalSorage(cartItem)) {
-            //     let checkItemColor = localStorageContent.filter(j => j.color === cartItem.color);
-            //     localStorageContent[checkItemColor].quantity = localStorageContent[checkItemColor].quantity + cartItem.quantity;
-            //     localStorage.setItem("item", JSON.stringify(localStorageContent))
-            // } else {
-            //     if (!localStorage) {
-            //         // const localStorageContent = []
-            //         localStorageContent.push(cartItem);
-            //         localStorage.setItem("item", JSON.stringify(localStorageContent));
-            //         confirm(`Le ${productJSON.name} ${cartItem.color}`)
-            //     }
-            // }
         })
     })
+    .catch((err) => alert(`Désolé pour le désagrément mais le produit est actuellement indisponible.`));
         
