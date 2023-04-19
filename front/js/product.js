@@ -57,33 +57,33 @@ getProductJson()
             const quantityInput = document.querySelector("input#quantity");
             let quantity = quantityInput.value;
 
-            /* ------- Create item's object ------- */
-            let selectItem = {
-                "id" : productJson._id,
-                "quantity" : quantity,
-                "color" : color
-            };
-            console.log(selectItem)
-
-            /* ------ Get value stored in localstorage from "item" key ------- */
-            const localStorageContent = JSON.parse(localStorage.getItem("item")) || [];
-
-            /* ------ Check if object already exists in localstorage ------- */
-            const existingItem = localStorageContent.find(item => item.id === selectItem.id && item.color === selectItem.color);
-
             /* ------- Check if a color and quantity have been chosen  ------- */
-            if (color == "" && quantity == "0") { alert(`Veuillez choisir une couleur et une quantité comprise entre 0 et 100.`)}
-            // if (color == "") { alert(`Veuillez choisir une couleur.`)}
-            // if (quantity < 1 || quantity > 100) { alert(`Veuillez choisir une quantité comprise entre 1 et 100`)}
+            if (color == "" && (quantity < 1 || quantity > 100)) { return alert(`Veuillez choisir une couleur et une quantité comprise entre 1 et 100.`) }
+            if (color == "") { return alert(`Veuillez choisir une couleur.`) }
+            if (quantity < 1 || quantity > 100) { return alert(`Veuillez choisir une quantité comprise entre 1 et 100`) }
             else {
-                if (existingItem) {
-                    existingItem.quantity = parseInt(existingItem.quantity) + parseInt(selectItem.quantity);
-                    console.log(existingItem)
-                } else {
-                    localStorageContent.push(selectItem);
-                }
-                /* ------ Updating value in localstorage ------- */
+                /* ------- Create item's object ------- */
+                let selectItem = {
+                    "id" : productJson._id,
+                    "quantity" : quantity,
+                    "color" : color
+                };
+                console.log(selectItem)
+                
+                /* ------ Get value stored in localstorage from "item" key ------- */
+                const localStorageContent = JSON.parse(localStorage.getItem("item")) ?? [];
+    
+                /* ------ Check if object already exists in localstorage ------- */
+                const existingItem = localStorageContent.find(item => item.id === selectItem.id && item.color === selectItem.color);
+                    if (existingItem) {
+                        existingItem.quantity = parseInt(existingItem.quantity) + parseInt(quantity);
+                        console.log(existingItem)
+                    } else {
+                        localStorageContent.push({"id" : productJson._id, "quantity" : quantity, "color" : color});
+                    }
+                    /* ------ Updating value in localstorage ------- */
                 localStorage.setItem("item", JSON.stringify(localStorageContent));
+                alert(`Le canapé ${productJson.name} ${selectItem.color} a été ajouté au panier ${selectItem.quantity} fois.`)
             }
         })
     })
