@@ -65,7 +65,7 @@ getProductJson()
                 /* ------- Create item's object ------- */
                 let selectItem = {
                     "id" : productJson._id,
-                    "quantity" : quantity,
+                    "quantity" : parseInt(quantity),
                     "color" : color
                 };
                 console.log(selectItem)
@@ -79,11 +79,15 @@ getProductJson()
                         existingItem.quantity = parseInt(existingItem.quantity) + parseInt(quantity);
                         console.log(existingItem)
                     } else {
-                        localStorageContent.push({"id" : productJson._id, "quantity" : quantity, "color" : color});
+                        localStorageContent.push(selectItem);
                     }
                     /* ------ Updating value in localstorage ------- */
                 localStorage.setItem("item", JSON.stringify(localStorageContent));
-                alert(`Le canapé ${productJson.name} ${selectItem.color} a été ajouté au panier ${selectItem.quantity} fois.`)
+                if (selectItem.quantity > 1) {
+                    alert(`${selectItem.quantity} exemplaires ${productJson.name} ${selectItem.color} ont été ajoutés au panier.`)
+                } else {
+                    alert(`${selectItem.quantity} exemplaire ${productJson.name} ${selectItem.color} a été ajouté au panier.`)
+                }
             }
         })
     })
