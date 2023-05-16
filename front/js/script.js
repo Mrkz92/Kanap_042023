@@ -1,9 +1,11 @@
 generateIndex();
 
 function generateIndex() {
+    /* ------- Call of the API ------- */
     const getJsonData = fetch(`http://localhost:3000/api/products`)
         .then(res => res.json())
         .then(function(jsonData) {
+            /* ------- Create loop for ------- */
                 for(let d in jsonData) {
                     let items = document.getElementById('items')
                         

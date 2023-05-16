@@ -2,7 +2,8 @@
 let cart = Array.from(JSON.parse(localStorage.getItem("item")) ?? []);
 console.log(cart);
 
-if(cart === null || cart == 0) {
+/* ------- Hydrate the HTML if cart's empty ------- */
+if (cart === null || cart == 0) {
     const cartAndFormContainer = document.querySelector("#cartAndFormContainer")
     cartAndFormContainer.innerHTML = `<h1>Votre panier est vide.</h1>`
 } else {
