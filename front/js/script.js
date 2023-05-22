@@ -1,23 +1,24 @@
 generateIndex();
 
-function generateIndex() {
-    /* ------- Call of the API ------- */
-    const getJsonData = fetch(`http://localhost:3000/api/products`)
-        .then(res => res.json())
-        .then(function(jsonData) {
-            /* ------- Create loop for ------- */
-                for(let d in jsonData) {
-                    let items = document.getElementById('items')
-                        
-                        let productLink = document.createElement("a")
-                        productLink.href = `./product.html?id=${jsonData[d]._id}`
-                        productLink.innerHTML = `
+async function generateIndex() {
+  /* ------- Call of the API ------- */
+  try {
+    const response = await fetch(`http://localhost:3000/api/products`);
+    const data = await response.json();
+    /* ------- Create loop for ------- */
+    for (const product of data) {
+      const items = document.getElementById("items");
+
+      let productLink = document.createElement("a");
+      productLink.href = `./product.html?id=${product._id}`;
+      productLink.innerHTML = `
                             <article>
-                                <img src="${jsonData[d].imageUrl}" alt="${jsonData[d].altTxt}">
-                                <h3 class="productName">${jsonData[d].name}</h3>
-                                <p class="productDescription">${jsonData[d].description}<p>`
-                        items.appendChild(productLink)
-                }
-        })
-        .catch((err) => alert(`Nous rencontrons un problème serveur, veulliez réessayer ultèrieurement.`));
+                                <img src="${product.imageUrl}" alt="${product.altTxt}">
+                                <h3 class="productName">${product.name}</h3>
+                                <p class="productDescription">${product.description}<p>`;
+      items.appendChild(productLink);
+    }
+  } catch (err) {
+    alert.err(`Nous rencontrons un problème serveur, veulliez réessayer ultèrieurement.`);
+  }
 }
