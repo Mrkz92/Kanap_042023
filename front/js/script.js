@@ -19,6 +19,7 @@ async function generateIndex() {
       items.appendChild(productLink);
     }
   } catch (err) {
-    alert.err(`Nous rencontrons un problème serveur, veulliez réessayer ultèrieurement.`);
+    console.error(err);
+    alert(`Nous rencontrons un problème serveur, veulliez réessayer ultèrieurement.`);
   }
 }

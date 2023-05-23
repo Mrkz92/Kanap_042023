@@ -90,10 +90,9 @@ if (!cart.length) {
 }
 
 getTotals();
-function getCart() {
-  return JSON.parse(localStorage.getItem("item")) ?? [];
-}
-
+/**
+ * Get all price and quantity
+ */
 async function getTotals() {
   const sumQuantity = [];
   const sumPrice = [];
@@ -209,8 +208,12 @@ async function getForm() {
     let order = { contact, products };
     console.log(JSON.stringify(order));
 
+    /**
+     *
+     * @returns {Promise<>}
+     */
     async function sendOrder() {
-      /* ------- Method to POSt on API ------- */
+      /* ------- Method to POST on API ------- */
       try {
         const response = await fetch(`http://localhost:3000/api/products/order`, {
           method: "POST",
@@ -234,3 +237,11 @@ async function getForm() {
   });
 }
 getForm();
+
+/**
+ *Get JSON data from local storage and parse them to object if exist or create an array
+ * @returns {Array<Product>}
+ */
+function getCart() {
+  return JSON.parse(localStorage.getItem("item")) ?? [];
+}
