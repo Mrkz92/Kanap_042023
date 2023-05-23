@@ -1,8 +1,8 @@
 /* ------ Get data from localStorage ------- */
-let cart = Array.from(JSON.parse(localStorage.getItem("item")) ?? []);
+let cart = getCart();
 
 /* ------- Hydrate the HTML if cart's empty ------- */
-if (!cart) {
+if (!cart.length) {
   const cartAndFormContainer = document.querySelector("#cartAndFormContainer");
   cartAndFormContainer.innerHTML = `<h1>Votre panier est vide.</h1>`;
 } else {
@@ -90,6 +90,10 @@ if (!cart) {
 }
 
 getTotals();
+function getCart() {
+  return JSON.parse(localStorage.getItem("item")) ?? [];
+}
+
 async function getTotals() {
   const sumQuantity = [];
   const sumPrice = [];
@@ -102,8 +106,8 @@ async function getTotals() {
     sumPrice.push(itemTotalPrice);
   }
 
-  const totalQuantity = sumQuantity.reduce((accumulator, currentValue) => accumulator + currentValue);
-  const totalPrice = sumPrice.reduce((accumulator, currentValue) => accumulator + currentValue);
+  const totalQuantity = sumQuantity.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+  const totalPrice = sumPrice.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
   const cartPrice = document.querySelector(".cart__price");
   cartPrice.innerHTML = `<p>Total (<span id="totalQuantity">${totalQuantity}</span> articles) : <span id="totalPrice">${totalPrice}</span> €</p>`;
@@ -125,36 +129,36 @@ async function getForm() {
   /* Validate the firstNameInput value */
   const firstNameErrorMsg = document.querySelector("#firstNameErrorMsg");
   function validFirstName(firstNameInput) {
-    if (!firstNameInput) throw (firstNameErrorMsg.innerText = "Veuillez remplir ce champ.");
-    if (!(firstNameInput.value.length > 2)) throw new Error((firstNameErrorMsg.innerText = "Prénom trop court."));
-    if (!(firstNameInput.value.length < 100)) throw new Error((firstNameErrorMsg.innerText = "Prénom trop long."));
+    if (!firstNameInput) return (firstNameErrorMsg.innerText = "Veuillez remplir ce champ.");
+    if (!(firstNameInput.value.length > 2)) return (firstNameErrorMsg.innerText = "Prénom trop court.");
+    if (!(firstNameInput.value.length < 100)) return (firstNameErrorMsg.innerText = "Prénom trop long.");
     return (firstNameErrorMsg.innerText = "");
   }
 
   /* Validate the lastNameInput value */
   const lastNameErrorMsg = document.querySelector("#lastNameErrorMsg");
   function validLastName(lastNameInput) {
-    if (!lastNameInput) throw (lastNameErrorMsg.innerText = "Veuillez remplir ce champ.");
-    if (!(lastNameInput.value.length > 2)) throw new Error((lastNameErrorMsg.innerText = "Nom trop court."));
-    if (!(lastNameInput.value.length < 100)) throw new Error((lastNameErrorMsg.innerText = "Nom trop long."));
+    if (!lastNameInput) return (lastNameErrorMsg.innerText = "Veuillez remplir ce champ.");
+    if (!(lastNameInput.value.length > 2)) return (lastNameErrorMsg.innerText = "Nom trop court.");
+    if (!(lastNameInput.value.length < 100)) return (lastNameErrorMsg.innerText = "Nom trop long.");
     return (lastNameErrorMsg.innerText = "");
   }
 
   /* Validate the addressInput value */
   const addressErrorMsg = document.querySelector("#addressErrorMsg");
   function validAddress(addressInput) {
-    if (!addressInput) throw (addressErrorMsg.innerText = "Veuillez remplir ce champ.");
-    if (!(addressInput.value.length > 2)) throw new Error((addressErrorMsg.innerText = "Adresse trop courte."));
-    if (!(addressInput.value.length < 100)) throw new Error((addressErrorMsg.innerText = "Adresse trop longue."));
+    if (!addressInput) return (addressErrorMsg.innerText = "Veuillez remplir ce champ.");
+    if (!(addressInput.value.length > 2)) return (addressErrorMsg.innerText = "Adresse trop courte.");
+    if (!(addressInput.value.length < 100)) return (addressErrorMsg.innerText = "Adresse trop longue.");
     return (addressErrorMsg.innerText = "");
   }
 
   /* Validate the cityInput value */
   const cityErrorMsg = document.querySelector("#cityErrorMsg");
   function validCity(cityInput) {
-    if (!cityInput) throw (cityErrorMsg.innerText = "Veuillez remplir ce champ.");
-    if (!(cityInput.value.length > 2)) throw new Error((cityErrorMsg.innerText = "Ville trop courte."));
-    if (!(cityInput.value.length < 100)) throw new Error((cityErrorMsg.innerText = "Ville trop longue."));
+    if (!cityInput) return (cityErrorMsg.innerText = "Veuillez remplir ce champ.");
+    if (!(cityInput.value.length > 2)) return (cityErrorMsg.innerText = "Ville trop courte.");
+    if (!(cityInput.value.length < 100)) return (cityErrorMsg.innerText = "Ville trop longue.");
     return (cityErrorMsg.innerText = "");
   }
 
@@ -162,9 +166,8 @@ async function getForm() {
   const regexEmail = /^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$/;
   const emailErrorMsg = document.querySelector("#emailErrorMsg");
   function validEmail(emailInput) {
-    if (!emailInput) throw (emailErrorMsg.innerText = "Veuillez remplir ce champ.");
-    if (!regexEmail.test(emailInput.value))
-      throw new Error((emailErrorMsg.innerText = "Veuillez renseigner un mail valide."));
+    if (!emailInput) return (emailErrorMsg.innerText = "Veuillez remplir ce champ.");
+    if (!regexEmail.test(emailInput.value)) return (emailErrorMsg.innerText = "Veuillez renseigner un mail valide.");
     return (emailErrorMsg.innerText = "");
   }
 
@@ -179,10 +182,17 @@ async function getForm() {
     let cityInput = document.querySelector("input#city");
     let emailInput = document.querySelector("input#email");
 
-    if (validFirstName(firstNameInput)) throw alert("Veuillez renseigner un prénom valide.");
-    if (validLastName(lastNameInput)) throw alert("Veuillez renseigner un nom valide.");
-    if (validCity(addressInput)) throw alert("Veuillez renseigner une ville valide.");
-    if (validAddress(cityInput)) throw alert("Veuillez renseigner une adresse valide.");
+    let validationMsg =
+      validFirstName(firstNameInput) ||
+      validLastName(lastNameInput) ||
+      validCity(cityInput) ||
+      validAddress(addressInput) ||
+      validEmail(emailInput);
+    if (validationMsg) return alert(validationMsg);
+    // if (validFirstName(firstNameInput)) return alert("Veuillez renseigner un prénom valide.");
+    // if (validLastName(lastNameInput)) return alert("Veuillez renseigner un nom valide.");
+    // if (validCity(cityInput)) return alert("Veuillez renseigner une ville valide.");
+    // if (validAddress(addressInput)) return alert("Veuillez renseigner une adresse valide.");
 
     contact = {
       firstName: firstNameInput.value,
@@ -213,10 +223,11 @@ async function getForm() {
         const data = await response.json();
         let orderId = data.orderId;
         /* ------- Redirect to the confirmation page or display a success message ------- */
+        if (!orderId) return;
         localStorage.clear();
-        if (orderId) throw (document.location.href = `confirmation.html?orderId=${orderId}`);
-      } catch {
-        (err) => alert.err("There was a problem sending the order");
+        document.location.href = `confirmation.html?orderId=${orderId}`;
+      } catch (err) {
+        alert("Le serveur a rencontré un problême, veuillez réessayer ultérieurement.");
       }
     }
     sendOrder();
