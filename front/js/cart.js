@@ -1,99 +1,134 @@
 /* ------ Get data from localStorage ------- */
 let cart = getCart();
+console.log(cart);
 
 /* ------- Hydrate the HTML if cart's empty ------- */
-if (!cart.length) {
-  const cartAndFormContainer = document.querySelector("#cartAndFormContainer");
-  cartAndFormContainer.innerHTML = `<h1>Votre panier est vide.</h1>`;
-} else {
-  /* ------- Hydrate items section with api and localStorage data ------- */
-  hydrateCart();
-  async function hydrateCart() {
-    for (let value of cart) {
-      let apiData = await fetch(`http://localhost:3000/api/products/${value.id}`).then((res) => res.json());
-      const cartItems = document.querySelector("section#cart__items");
-      let cartItem = document.createElement("article");
-      cartItem.setAttribute("class", "cart__item");
-      cartItem.setAttribute("data-id", `${value.id}`);
-      cartItem.setAttribute("data-color", `${value.color}`);
-      cartItem.innerHTML = `   
-                    <div class="cart__item__img">
-                        <img src="${apiData.imageUrl}" alt="${apiData.altTxt}">
-                    </div>
-                    <div class="cart__item__content">
-                        <div class="cart__item__content__description">
-                        <h2>${apiData.name}</h2>
-                        <p>${value.color}</p>
-                        <p>${apiData.price},00 €</p>
-                        </div>
-                        <div class="cart__item__content__settings">
-                        <div class="cart__item__content__settings__quantity">
-                            <p>Qté : </p>
-                            <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${value.quantity}">
-                        </div>
-                        <div class="cart__item__content__settings__delete">
-                            <p class="deleteItem">Supprimer</p>
-                        </div>
-                        </div>
-                    </div>
-                </article>`;
-      cartItems.appendChild(cartItem);
+if (!cart.length) document.querySelector("#cartAndFormContainer").innerHTML = `<h1>Votre panier est vide.</h1>`;
 
-      /* ------- Create function to delete one item ------- */
-      function deleteItem() {
-        /* ------- Reach each all delete buttons before listen to them ------ */
-        const deleteButtons = document.querySelectorAll("p.deleteItem");
-        deleteButtons.forEach((button) => {
-          /* ------- Listen to the delete button ------- */
-          button.addEventListener("click", (event) => {
-            event.preventDefault();
-
-            const itemId = event.target.closest(".cart__item").dataset.id;
-            const itemColor = event.target.closest(".cart__item").dataset.color;
-            /* ------- Filter item from cart ------- */
-            cart = cart.filter((item) => !(item.id === itemId && item.color === itemColor));
-
-            /* ------- Save updated cart to local storage ------- */
-            localStorage.setItem("item", JSON.stringify(cart));
-            window.location.reload();
-          });
-        });
-      }
-      deleteItem();
-
-      /* ------- Create function to modify item's quantity ------ */
-      function inputQuantity() {
-        const itemQuantityInputs = document.querySelectorAll(".itemQuantity");
-        /* ------- Reach each all quantity inputs before listen to them ------ */
-        itemQuantityInputs.forEach((input, index) => {
-          /* ------- Listen to quantity button ------- */
-          input.addEventListener("input", (event) => {
-            event.preventDefault();
-            let itemQuantityValue = event.target.value;
-
-            /* ------- Update cart item quantity ------- */
-            cart[index].quantity = itemQuantityValue;
-
-            /* ------- Save updated cart to local storage ------- */
-            localStorage.setItem("item", JSON.stringify(cart));
-
-            if (itemQuantityValue == 0) {
-              event.target.closest(".cart__item").remove();
-              window.location.reload();
-            }
-          });
-        });
-      }
-      inputQuantity();
-    }
+/**
+ * Create a loop to hydrate and manage the cart section
+ */
+async function loopToManageCartSection() {
+  for (let index = 0; index < cart.length; index++) {
+    const product = cart[index];
+    /* ------- Fetch data from API ------- */
+    const data = await fecthDataFromApi(product);
+    /* ------- Hydrate cart HTML with API and local storage data ------- */
+    hydrateCart(product, data);
+    /* ------- Create function to delete one item ------- */
+    deleteItem();
+    /* ------- Create function to modify item's quantity ------ */
+    modifyQuantity();
   }
 }
+loopToManageCartSection();
+/* ------- Listen to all form's input and verify validity ------- */
+getForm();
 
-getTotals();
+/**
+ *Get JSON data from local storage and parse them to object if exist or create an array
+ * @returns {Array<Product>}
+ */
 function getCart() {
-  return JSON.parse(localStorage.getItem("item")) ?? [];
+  return Array.from(JSON.parse(localStorage.getItem("item"))) ?? [];
 }
 
+/**
+ * Fetch data from product in API
+ * @param {number} product
+ * @returns {Promise<data>}
+ */
+async function fecthDataFromApi(product) {
+  const response = await fetch(`http://localhost:3000/api/products/${product.id}`);
+  const data = await response.json();
+  return data;
+}
+/**
+ *Hydrate cart HTML with API and local storage data
+ */
+function hydrateCart(product, data) {
+  const cartItems = document.querySelector("section#cart__items");
+  const cartItem = document.createElement("article");
+  cartItem.setAttribute("class", "cart__item");
+  cartItem.setAttribute("data-id", `${product.id}`);
+  cartItem.setAttribute("data-color", `${product.color}`);
+  cartItem.innerHTML = `   
+    <div class="cart__item__img">
+        <img src="${data.imageUrl}" alt="${data.altTxt}">
+    </div>
+    <div class="cart__item__content">
+        <div class="cart__item__content__description">
+        <h2>${data.name}</h2>
+        <p>${product.color}</p>
+        <p>${data.price},00 €</p>
+        </div>
+        <div class="cart__item__content__settings">
+        <div class="cart__item__content__settings__quantity">
+            <p>Qté : </p>
+            <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${product.quantity}">
+        </div>
+        <div class="cart__item__content__settings__delete">
+            <p class="deleteItem">Supprimer</p>
+        </div>
+        </div>
+    </div>`;
+  cartItems.appendChild(cartItem);
+}
+
+/**
+ *Listen to the button to delete the product
+ */
+function deleteItem() {
+  const deleteButtons = document.querySelectorAll("p.deleteItem");
+  deleteButtons.forEach((button) => {
+    /* ------- Listen to the delete button ------- */
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const itemId = event.target.closest(".cart__item").dataset.id;
+      const itemColor = event.target.closest(".cart__item").dataset.color;
+      /* ------- Filter item from cart ------- */
+      cart = cart.filter((item) => !(item.id === itemId && item.color === itemColor));
+
+      /* ------- Save updated cart to local storage ------- */
+      localStorage.setItem("item", JSON.stringify(cart));
+      window.location.reload();
+    });
+    /* ------- Get all prices and quantities to have totals ------- */
+    getTotals();
+  });
+}
+
+/**
+ *Listen to the input to modify the product quantity
+ */
+function modifyQuantity() {
+  const itemQuantityInputs = document.querySelectorAll(".itemQuantity");
+  /* ------- Reach each all quantity inputs before listen to them ------ */
+  itemQuantityInputs.forEach((input, index) => {
+    /* ------- Listen to quantity button ------- */
+    input.addEventListener("click", (event) => {
+      event.preventDefault();
+      let itemQuantityValue = event.target.value;
+
+      /* ------- Update cart item quantity ------- */
+      cart[index].quantity = itemQuantityValue;
+
+      /* ------- Save updated cart to local storage ------- */
+      localStorage.setItem("item", JSON.stringify(cart));
+
+      if (itemQuantityValue == 0) {
+        event.target.closest(".cart__item").remove();
+        window.location.reload();
+      }
+      /* ------- Get all prices and quantities to have totals ------- */
+      getTotals();
+    });
+  });
+}
+/**
+ * Get all prices and quantities to have totals
+ */
 async function getTotals() {
   const sumQuantity = [];
   const sumPrice = [];
@@ -113,8 +148,11 @@ async function getTotals() {
   cartPrice.innerHTML = `<p>Total (<span id="totalQuantity">${totalQuantity}</span> articles) : <span id="totalPrice">${totalPrice}</span> €</p>`;
 }
 
-async function getForm() {
-  let form = document.querySelector("form.cart__order__form");
+/**
+ *Listen to all form's input and verify validity
+ */
+function getForm() {
+  const form = document.querySelector("form.cart__order__form");
   /* Listen to firstName input */
   form.firstName.addEventListener("input", (event) => validFirstName(event.target));
   /* Listen to lastName input */
@@ -171,16 +209,14 @@ async function getForm() {
     return (emailErrorMsg.innerText = "");
   }
 
-  /* ------- Listen to the the order button ------- */
-  const submitButton = document.querySelector("input#order");
-  submitButton.addEventListener("click", (submit) => {
+  document.querySelector("input#order").addEventListener("click", (submit) => {
     submit.preventDefault();
     /* Get all the form  value*/
-    let firstNameInput = document.querySelector("input#firstName");
-    let lastNameInput = document.querySelector("input#lastName");
-    let addressInput = document.querySelector("input#address");
-    let cityInput = document.querySelector("input#city");
-    let emailInput = document.querySelector("input#email");
+    const firstNameInput = document.querySelector("input#firstName");
+    const lastNameInput = document.querySelector("input#lastName");
+    const addressInput = document.querySelector("input#address");
+    const cityInput = document.querySelector("input#city");
+    const emailInput = document.querySelector("input#email");
 
     let validationMsg =
       validFirstName(firstNameInput) ||
@@ -189,10 +225,6 @@ async function getForm() {
       validAddress(addressInput) ||
       validEmail(emailInput);
     if (validationMsg) return alert(validationMsg);
-    // if (validFirstName(firstNameInput)) return alert("Veuillez renseigner un prénom valide.");
-    // if (validLastName(lastNameInput)) return alert("Veuillez renseigner un nom valide.");
-    // if (validCity(cityInput)) return alert("Veuillez renseigner une ville valide.");
-    // if (validAddress(addressInput)) return alert("Veuillez renseigner une adresse valide.");
 
     contact = {
       firstName: firstNameInput.value,
@@ -206,11 +238,15 @@ async function getForm() {
     const products = cart.map((product) => product.id);
 
     /* ------- Create object to POST on API ------- */
-    let order = { contact, products };
+    const order = { contact, products };
     console.log(JSON.stringify(order));
 
+    /**
+     * Post order JSON on API and get orderId before redirect to the confirmation page
+     * @returns {Promise<orderId(number)>}
+     */
     async function sendOrder() {
-      /* ------- Method to POSt on API ------- */
+      /* ------- Post order JSON on API and get orderId before redirect to the confirmation page ------- */
       try {
         const response = await fetch(`http://localhost:3000/api/products/order`, {
           method: "POST",
@@ -221,7 +257,7 @@ async function getForm() {
           body: JSON.stringify(order),
         });
         const data = await response.json();
-        let orderId = data.orderId;
+        const orderId = data.orderId;
         /* ------- Redirect to the confirmation page or display a success message ------- */
         if (!orderId) return;
         localStorage.clear();
@@ -233,4 +269,3 @@ async function getForm() {
     sendOrder();
   });
 }
-getForm();
