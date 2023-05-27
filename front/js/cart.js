@@ -25,7 +25,7 @@ loopToManageCartSection();
 getForm();
 
 /**
- *Get JSON data from local storage and parse them to object if exist or create an array
+ *Get JSON data from local storage and convert them to object if exist or create an array
  * @returns {Array<Product>}
  */
 function getCart() {
@@ -64,7 +64,7 @@ function hydrateCart(product, data) {
         <div class="cart__item__content__settings">
         <div class="cart__item__content__settings__quantity">
             <p>Qté : </p>
-            <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${product.quantity}">
+            <input type="number" class="itemQuantity" name="itemQuantity" min="0" max="100" value="${product.quantity}">
         </div>
         <div class="cart__item__content__settings__delete">
             <p class="deleteItem">Supprimer</p>
@@ -117,11 +117,12 @@ function modifyQuantity() {
       localStorage.setItem("item", JSON.stringify(cart));
       console.log(index);
 
-      // if (itemQuantityValue == 0) {
-      //   event.target.closest(".cart__item").remove();
-      //   cart.splice(cart[index], 1);
-      //   localStorage.setItem("item", JSON.stringify(cart));
-      // }
+      if (itemQuantityValue == 0) {
+        deleteItem();
+        //   event.target.closest(".cart__item").remove();
+        //   cart.splice(cart[index], 1);
+        //   localStorage.setItem("item", JSON.stringify(cart));
+      }
       getTotals();
     });
   });

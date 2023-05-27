@@ -1,10 +1,11 @@
 generateIndex();
 
+/**
+ * Call of functions to get all datas from the API and hydrate the HTML
+ */
 async function generateIndex() {
   try {
-    /* ------- Call of the API ------- */
     const data = await fetchDataFromApi();
-    /* ------- Create loop for ------- */
     loopToCreateHTMLSheetForEachProducts(data);
   } catch (err) {
     console.error(err);
@@ -12,11 +13,20 @@ async function generateIndex() {
   }
 }
 
+/**
+ *Fetch all data from products in API
+ * @returns {Promise<Products>}
+ */
 async function fetchDataFromApi() {
   const response = await fetch(`http://localhost:3000/api/products`);
   const data = await response.json();
   return data;
 }
+
+/**
+ * Hydrate index.html with data from API
+ * @param {*} data
+ */
 function loopToCreateHTMLSheetForEachProducts(data) {
   for (const product of data) {
     const items = document.getElementById("items");

@@ -1,10 +1,10 @@
 fetchProductFromUrlId()
   .then(function (data) {
     /*------- Get container's element -------*/
-    populateProductHTMLWithData(data);
+    hydrateProductHTMLWithData(data);
 
     /*------- FIll select field -------*/
-    populateOptionWithData(data);
+    hydrateOptionWithData(data);
 
     /* ------- Listen to the click on the #addToCart button -------*/
     listenBtnToSendOnLocalStorage(data);
@@ -26,7 +26,7 @@ async function fetchProductFromUrlId() {
  * Populate product.html with data
  * @param {*} data
  */
-function populateProductHTMLWithData(data) {
+function hydrateProductHTMLWithData(data) {
   const item = document.querySelector(".item article");
   /*------- Create image's element -------*/
   const itemImage = document.querySelector(".item__img");
@@ -50,7 +50,7 @@ function populateProductHTMLWithData(data) {
  * Populate option with data from API
  * @param {} data
  */
-function populateOptionWithData(data) {
+function hydrateOptionWithData(data) {
   const itemSelector = document.querySelector("#colors");
   const colorsJson = data.colors;
   fillOption(itemSelector, colorsJson);
