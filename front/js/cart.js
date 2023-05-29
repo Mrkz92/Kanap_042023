@@ -1,9 +1,12 @@
-/* ------ Get data from localStorage ------- */
+/**
+ * Get JSON data from local storage and convert them to object if exist or create an empty array
+ * @returns {Promise<Array>}
+ */
+const getCart = () => Array.from(JSON.parse(localStorage.getItem("item"))) ?? [];
 let cart = getCart();
-console.log(cart.length);
-
 /* ------- Hydrate the HTML if cart's empty ------- */
-if (!cart.length) throw (document.querySelector("#cartAndFormContainer").innerHTML = `<h1>Votre panier est vide.</h1>`);
+if (!cart.length || !cart)
+  throw (document.querySelector("#cartAndFormContainer").innerHTML = `<h1>Votre panier est vide.</h1>`);
 /**
  * Create a loop to hydrate and manage the cart section
  */
@@ -23,14 +26,6 @@ async function loopToManageCartSection() {
 loopToManageCartSection();
 /* ------- Listen to all form's input and verify validity ------- */
 getForm();
-
-/**
- *Get JSON data from local storage and convert them to object if exist or create an array
- * @returns {Array<Product>}
- */
-function getCart() {
-  return Array.from(JSON.parse(localStorage.getItem("item"))) ?? [];
-}
 
 /**
  * Fetch data from product in API
@@ -64,7 +59,7 @@ function hydrateCart(product, data) {
         <div class="cart__item__content__settings">
         <div class="cart__item__content__settings__quantity">
             <p>Qté : </p>
-            <input type="number" class="itemQuantity" name="itemQuantity" min="0" max="100" value="${product.quantity}">
+            <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${product.quantity}">
         </div>
         <div class="cart__item__content__settings__delete">
             <p class="deleteItem">Supprimer</p>
@@ -82,10 +77,11 @@ function deleteItem() {
   deleteButtons.forEach((button) => {
     /* ------- Listen to the delete button ------- */
     button.addEventListener("click", (event) => {
+      console.log(button);
       event.preventDefault();
 
-      const itemId = event.target.closest(".cart__item").dataset.id;
-      const itemColor = event.target.closest(".cart__item").dataset.color;
+      const itemId = event.target.closest(".cart__item").getAttribute("data-id");
+      const itemColor = event.target.closest(".cart__item").getAttribute("data-color");
       /* ------- Filter item from cart ------- */
       cart = cart.filter((item) => !(item.id === itemId && item.color === itemColor));
 
@@ -119,9 +115,6 @@ function modifyQuantity() {
 
       if (itemQuantityValue == 0) {
         deleteItem();
-        //   event.target.closest(".cart__item").remove();
-        //   cart.splice(cart[index], 1);
-        //   localStorage.setItem("item", JSON.stringify(cart));
       }
       getTotals();
     });
@@ -165,39 +158,47 @@ function getForm() {
   /* Listen to email input */
   form.email.addEventListener("input", (event) => validEmail(event.target));
 
+  const regexName = /^[A-Za-àzèéêëîïôöûü0-9' -]/;
   /* Validate the firstNameInput value */
   const firstNameErrorMsg = document.querySelector("#firstNameErrorMsg");
   function validFirstName(firstNameInput) {
-    if (!firstNameInput) return (firstNameErrorMsg.innerText = "Veuillez remplir ce champ.");
+    if (!firstNameInput.value.length) return (firstNameErrorMsg.innerText = "Veuillez remplir ce champ de formulaire.");
     if (!(firstNameInput.value.length > 2)) return (firstNameErrorMsg.innerText = "Prénom trop court.");
     if (!(firstNameInput.value.length < 100)) return (firstNameErrorMsg.innerText = "Prénom trop long.");
+    if (!regexName.test(firstNameInput.value))
+      return (firstNameErrorMsg.innerText = "Veuillez renseigner un prénom valide.");
     return (firstNameErrorMsg.innerText = "");
   }
 
   /* Validate the lastNameInput value */
   const lastNameErrorMsg = document.querySelector("#lastNameErrorMsg");
   function validLastName(lastNameInput) {
-    if (!lastNameInput) return (lastNameErrorMsg.innerText = "Veuillez remplir ce champ.");
+    if (!lastNameInput.value.length) return (lastNameErrorMsg.innerText = "Veuillez remplir ce champ de formulaire.");
     if (!(lastNameInput.value.length > 2)) return (lastNameErrorMsg.innerText = "Nom trop court.");
     if (!(lastNameInput.value.length < 100)) return (lastNameErrorMsg.innerText = "Nom trop long.");
+    if (!regexName.test(lastNameInput.value))
+      return (lastNameErrorMsg.innerText = "Veuillez renseigner un nom valide.");
     return (lastNameErrorMsg.innerText = "");
   }
 
   /* Validate the addressInput value */
   const addressErrorMsg = document.querySelector("#addressErrorMsg");
   function validAddress(addressInput) {
-    if (!addressInput) return (addressErrorMsg.innerText = "Veuillez remplir ce champ.");
+    if (!addressInput.value.length) return (addressErrorMsg.innerText = "Veuillez remplir ce champ de formulaire.");
     if (!(addressInput.value.length > 2)) return (addressErrorMsg.innerText = "Adresse trop courte.");
     if (!(addressInput.value.length < 100)) return (addressErrorMsg.innerText = "Adresse trop longue.");
+    if (!regexName.test(addressInput.value))
+      return (addressErrorMsg.innerText = "Veuillez renseigner une adresse valide.");
     return (addressErrorMsg.innerText = "");
   }
 
   /* Validate the cityInput value */
   const cityErrorMsg = document.querySelector("#cityErrorMsg");
   function validCity(cityInput) {
-    if (!cityInput) return (cityErrorMsg.innerText = "Veuillez remplir ce champ.");
+    if (!cityInput.value.length) return (cityErrorMsg.innerText = "Veuillez remplir ce champ de formulaire.");
     if (!(cityInput.value.length > 2)) return (cityErrorMsg.innerText = "Ville trop courte.");
     if (!(cityInput.value.length < 100)) return (cityErrorMsg.innerText = "Ville trop longue.");
+    if (!regexName.test(cityInput.value)) return (cityErrorMsg.innerText = "Veuillez renseigner une ville valide.");
     return (cityErrorMsg.innerText = "");
   }
 
@@ -205,7 +206,7 @@ function getForm() {
   const regexEmail = /^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$/;
   const emailErrorMsg = document.querySelector("#emailErrorMsg");
   function validEmail(emailInput) {
-    if (!emailInput) return (emailErrorMsg.innerText = "Veuillez remplir ce champ.");
+    if (!emailInput.value.length) return (emailErrorMsg.innerText = "Veuillez remplir ce champ de formulaire.");
     if (!regexEmail.test(emailInput.value)) return (emailErrorMsg.innerText = "Veuillez renseigner un mail valide.");
     return (emailErrorMsg.innerText = "");
   }
