@@ -158,15 +158,15 @@ function getForm() {
   /* Listen to email input */
   form.email.addEventListener("input", (event) => validEmail(event.target));
 
-  const regexName = /^[A-Za-àzèéêëîïôöûü0-9' -]/;
+  const regexName = /^[A-Za-zàèéêëîïôöûü0-9' -]*$/;
   /* Validate the firstNameInput value */
   const firstNameErrorMsg = document.querySelector("#firstNameErrorMsg");
   function validFirstName(firstNameInput) {
     if (!firstNameInput.value.length) return (firstNameErrorMsg.innerText = "Veuillez remplir ce champ de formulaire.");
-    if (!(firstNameInput.value.length > 2)) return (firstNameErrorMsg.innerText = "Prénom trop court.");
-    if (!(firstNameInput.value.length < 100)) return (firstNameErrorMsg.innerText = "Prénom trop long.");
     if (!regexName.test(firstNameInput.value))
       return (firstNameErrorMsg.innerText = "Veuillez renseigner un prénom valide.");
+    if (!(firstNameInput.value.length > 2)) return (firstNameErrorMsg.innerText = "Prénom trop court.");
+    if (!(firstNameInput.value.length < 100)) return (firstNameErrorMsg.innerText = "Prénom trop long.");
     return (firstNameErrorMsg.innerText = "");
   }
 
@@ -174,10 +174,10 @@ function getForm() {
   const lastNameErrorMsg = document.querySelector("#lastNameErrorMsg");
   function validLastName(lastNameInput) {
     if (!lastNameInput.value.length) return (lastNameErrorMsg.innerText = "Veuillez remplir ce champ de formulaire.");
-    if (!(lastNameInput.value.length > 2)) return (lastNameErrorMsg.innerText = "Nom trop court.");
-    if (!(lastNameInput.value.length < 100)) return (lastNameErrorMsg.innerText = "Nom trop long.");
     if (!regexName.test(lastNameInput.value))
       return (lastNameErrorMsg.innerText = "Veuillez renseigner un nom valide.");
+    if (!(lastNameInput.value.length > 2)) return (lastNameErrorMsg.innerText = "Nom trop court.");
+    if (!(lastNameInput.value.length < 100)) return (lastNameErrorMsg.innerText = "Nom trop long.");
     return (lastNameErrorMsg.innerText = "");
   }
 
@@ -185,10 +185,10 @@ function getForm() {
   const addressErrorMsg = document.querySelector("#addressErrorMsg");
   function validAddress(addressInput) {
     if (!addressInput.value.length) return (addressErrorMsg.innerText = "Veuillez remplir ce champ de formulaire.");
-    if (!(addressInput.value.length > 2)) return (addressErrorMsg.innerText = "Adresse trop courte.");
-    if (!(addressInput.value.length < 100)) return (addressErrorMsg.innerText = "Adresse trop longue.");
     if (!regexName.test(addressInput.value))
       return (addressErrorMsg.innerText = "Veuillez renseigner une adresse valide.");
+    if (!(addressInput.value.length > 2)) return (addressErrorMsg.innerText = "Adresse trop courte.");
+    if (!(addressInput.value.length < 100)) return (addressErrorMsg.innerText = "Adresse trop longue.");
     return (addressErrorMsg.innerText = "");
   }
 
@@ -196,9 +196,9 @@ function getForm() {
   const cityErrorMsg = document.querySelector("#cityErrorMsg");
   function validCity(cityInput) {
     if (!cityInput.value.length) return (cityErrorMsg.innerText = "Veuillez remplir ce champ de formulaire.");
+    if (!regexName.test(cityInput.value)) return (cityErrorMsg.innerText = "Veuillez renseigner une ville valide.");
     if (!(cityInput.value.length > 2)) return (cityErrorMsg.innerText = "Ville trop courte.");
     if (!(cityInput.value.length < 100)) return (cityErrorMsg.innerText = "Ville trop longue.");
-    if (!regexName.test(cityInput.value)) return (cityErrorMsg.innerText = "Veuillez renseigner une ville valide.");
     return (cityErrorMsg.innerText = "");
   }
 
