@@ -16,10 +16,7 @@ async function loopToManageCartSection() {
     const data = await fecthDataFromApi(product);
     /* ------- Hydrate cart HTML with API and local storage data ------- */
     hydrateCart(product, data);
-    /* ------- Create function to delete one item ------- */
-    deleteItem();
-    /* ------- Create function to modify item's quantity ------ */
-    modifyQuantity();
+    getTotals();
   }
 }
 loopToManageCartSection();
@@ -42,82 +39,95 @@ async function fecthDataFromApi(product) {
 function hydrateCart(product, data) {
   const cartItems = document.querySelector("section#cart__items");
   const cartItem = document.createElement("article");
-  cartItem.setAttribute("class", "cart__item");
+  cartItem.classList.add("cart__item");
   cartItem.setAttribute("data-id", `${product.id}`);
   cartItem.setAttribute("data-color", `${product.color}`);
-  cartItem.innerHTML = `   
-    <div class="cart__item__img">
-        <img src="${data.imageUrl}" alt="${data.altTxt}">
-    </div>
-    <div class="cart__item__content">
-        <div class="cart__item__content__description">
-        <h2>${data.name}</h2>
-        <p>${product.color}</p>
-        <p>${data.price},00 €</p>
-        </div>
-        <div class="cart__item__content__settings">
-        <div class="cart__item__content__settings__quantity">
-            <p>Qté : </p>
-            <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${product.quantity}">
-        </div>
-        <div class="cart__item__content__settings__delete">
-            <p class="deleteItem">Supprimer</p>
-        </div>
-        </div>
-    </div>`;
   cartItems.appendChild(cartItem);
+
+  const cartItemImg = document.createElement("div");
+  cartItemImg.classList.add("cart__item__img");
+  cartItemImg.innerHTML = `<img src="${data.imageUrl}" alt="${data.altTxt}">`;
+  cartItem.appendChild(cartItemImg);
+
+  const cartItemContent = document.createElement("div");
+  cartItemContent.classList.add("cart__item__content");
+  cartItem.appendChild(cartItemContent);
+
+  const itemDescription = document.createElement("div");
+  itemDescription.classList.add("cart__item__content");
+  itemDescription.innerHTML = `
+  <div class="cart__item__content__description">
+    <h2>${data.name}</h2>
+    <p>${product.color}</p>
+    <p>${data.price},00 €</p>
+  </div>`;
+  cartItemContent.appendChild(itemDescription);
+
+  const cartSettings = document.createElement("div");
+  cartSettings.classList.add("cart__item__content__settings");
+  cartItemContent.appendChild(cartSettings);
+
+  const quantitySettings = document.createElement("div");
+  quantitySettings.classList.add("cart__item__content__settings__quantity");
+  quantitySettings.innerHTML = `<p>Qté : </p>`;
+  cartSettings.appendChild(quantitySettings);
+
+  const inputQuantity = document.createElement("input");
+  inputQuantity.classList.add("itemQuantity");
+  inputQuantity.setAttribute("type", "number");
+  inputQuantity.setAttribute("name", "itemQuantity");
+  inputQuantity.setAttribute("min", "1");
+  inputQuantity.setAttribute("max", "100");
+  inputQuantity.value = product.quantity;
+  inputQuantity.addEventListener("input", modifyQuantity); //Listen to the input to modify quantity
+  quantitySettings.appendChild(inputQuantity);
+  console.log(inputQuantity);
+
+  const deleteSettings = document.createElement("div");
+  deleteSettings.classList.add("cart__item__content__settings__delete");
+  cartSettings.appendChild(deleteSettings);
+
+  const deleteItem = document.createElement("p");
+  deleteItem.classList.add("deleteItem");
+  deleteItem.innerText = `Supprimer`;
+  deleteItem.addEventListener("click", deleteCartItem); //Listen to the button to delete the product
+  deleteSettings.appendChild(deleteItem);
+  console.log(deleteItem);
 }
 
 /**
  *Listen to the button to delete the product
  */
-function deleteItem() {
-  const deleteButtons = document.querySelectorAll("p.deleteItem");
-  deleteButtons.forEach((button) => {
-    /* ------- Listen to the delete button ------- */
-    button.addEventListener("click", (event) => {
-      console.log(button);
-      event.preventDefault();
-
-      const itemId = event.target.closest(".cart__item").getAttribute("data-id");
-      const itemColor = event.target.closest(".cart__item").getAttribute("data-color");
-      /* ------- Filter item from cart ------- */
-      cart = cart.filter((item) => !(item.id === itemId && item.color === itemColor));
-
-      /* ------- Save updated cart to local storage ------- */
-      localStorage.setItem("item", JSON.stringify(cart));
-      window.location.reload();
-    });
-    /* ------- Get all prices and quantities to have totals ------- */
+function deleteCartItem() {
+  const cartItem = this.closest("article");
+  const itemId = cartItem.getAttribute("data-id");
+  const itemColor = cartItem.getAttribute("data-color");
+  const itemIndex = cart.findIndex((item) => item.id === itemId && item.color === itemColor);
+  if (itemIndex !== -1) {
+    cart.splice(itemIndex, 1);
+    cartItem.remove();
+    localStorage.setItem("item", JSON.stringify(cart)); // Mettre à jour le local storage
     getTotals();
-  });
+  }
 }
 
 /**
  *Listen to the input to modify the product quantity
  */
 function modifyQuantity() {
-  const itemQuantityInputs = document.querySelectorAll(".itemQuantity");
-  /* ------- Reach each all quantity inputs before listen to them ------ */
-  itemQuantityInputs.forEach((input, index) => {
-    /* ------- Listen to quantity button ------- */
-    input.addEventListener("input", (event) => {
-      event.preventDefault();
-      let itemQuantityValue = parseInt(event.target.value);
-
-      /* ------- Update cart item quantity ------- */
-      cart[index].quantity = itemQuantityValue;
-
-      /* ------- Save updated cart to local storage ------- */
-      localStorage.setItem("item", JSON.stringify(cart));
-      console.log(index);
-
-      if (itemQuantityValue == 0) {
-        deleteItem();
-      }
-      getTotals();
-    });
-  });
+  let itemQuantityValue = parseInt(this.value);
+  const cartItem = this.closest("article");
+  const itemId = cartItem.getAttribute("data-id");
+  const itemColor = cartItem.getAttribute("data-color");
+  const itemIndex = cart.findIndex((item) => item.id === itemId && item.color === itemColor);
+  if (itemIndex !== -1) {
+    cart[itemIndex].quantity = itemQuantityValue;
+    localStorage.setItem("item", JSON.stringify(cart));
+    if (itemQuantityValue === 0) {
+      deleteCartItem.call(this);
+    }
+    getTotals();
+  }
 }
 /**
  * Get all prices and quantities to have totals
