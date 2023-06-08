@@ -2,11 +2,10 @@
  * Get JSON data from local storage and convert them to object if exist or create an empty array
  * @returns {Promise<Array>}
  */
-const getCart = () => Array.from(JSON.parse(localStorage.getItem("item"))) ?? [];
+const getCart = () => JSON.parse(localStorage.getItem("item")) || [];
 let cart = getCart();
 /* ------- Hydrate the HTML if cart's empty ------- */
-if (!cart.length || !cart)
-  throw (document.querySelector("#cartAndFormContainer").innerHTML = `<h1>Votre panier est vide.</h1>`);
+if (!cart.length) throw (document.querySelector("#cartAndFormContainer").innerHTML = `<h1>Votre panier est vide.</h1>`);
 /**
  * Create a loop to hydrate and manage the cart section
  */
