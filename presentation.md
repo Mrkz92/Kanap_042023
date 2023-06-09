@@ -63,12 +63,14 @@ presentation:
 
 ## Page panier
 
-- Affichage dans le panier
+- Panier
   - Récupération des données dans le local storage et l'API
   - Affichage dans le panier
-- Gestion du bon fonctionnement du formulaire
-- Envoi des données du panier et du formulaire si valides vers l'API et récupération de l'orderId
-- Redirection vers la page confirmation
+  - Gestion du panier
+- Formulaire
+  - Gestion du bon fonctionnement du formulaire
+  - Envoi des données du panier et du formulaire si valides vers l'API et récupération de l'orderId
+  - Redirection vers la page confirmation
 - Panne serveur
 
 <aside class="notes"></aside>
