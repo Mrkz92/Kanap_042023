@@ -2,17 +2,34 @@
 /*Confirmation*/
 /**************/
 .confirmation {
-    display: flex;
-    justify-content: center;
-    margin-top: 85px;
-    margin-bottom: 85px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 85px;
+  margin-bottom: 85px;
 }
 
 .confirmation p {
-    background-color: white;
-    color: #3d424f;
-    text-align: center;
-    font-weight: 500;
-    padding: 30px;
-    border-radius: 25px;
+  background-color: white;
+  color: #3d424f;
+  text-align: center;
+  font-weight: 500;
+  padding: 30px;
+  border-radius: 25px;
+}
+
+.confirmation a {
+  font-size: 22px;
+  border-radius: 40px;
+  border: 0;
+  background-color: var(--secondary-color);
+  color: white;
+  padding: 18px 28px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.confirmation a:hover {
+  box-shadow: rgba(42, 18, 206, 0.9) 0 0 22px 6px;
 }

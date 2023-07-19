@@ -1,15 +1,21 @@
 fetchProductFromUrlId()
   .then(function (data) {
-    /*------- Get container's element -------*/
-    hydrateProductHTMLWithData(data);
+    if (Object.keys(data).length !== 0) {
+      /*------- Get container's element -------*/
+      hydrateProductHTMLWithData(data);
 
-    /*------- FIll select field -------*/
-    hydrateOptionWithData(data);
+      /*------- Fill select field -------*/
+      hydrateOptionWithData(data);
 
-    /* ------- Listen to the click on the #addToCart button -------*/
-    listenBtnToSendOnLocalStorage(data);
+      /* ------- Listen to the click on the #addToCart button -------*/
+      listenBtnToSendOnLocalStorage(data);
+    } else {
+      displayErrorMessage();
+    }
   })
-  .catch((err) => alert(`Désolé pour le désagrément mais le produit est actuellement indisponible.`));
+  .catch((err) => {
+    displayErrorMessage();
+  });
 
 /**
  * Fetch a product data from id search param in URL
@@ -27,22 +33,24 @@ async function fetchProductFromUrlId() {
  * @param {*} data
  */
 function hydrateProductHTMLWithData(data) {
-  const item = document.querySelector(".item article");
-  /*------- Create image's element -------*/
   const itemImage = document.querySelector(".item__img");
+  const itemName = document.querySelector("#title");
+  const itemPrice = document.querySelector("#price");
+  const itemDescription = document.querySelector("#description");
+
+  /*------- Create image's element -------*/
   const image = document.createElement("img");
   image.src = data.imageUrl;
   image.alt = data.altTxt;
   itemImage.appendChild(image);
+
   /*------- Fill name's element -------*/
-  const itemName = document.querySelector("#title");
   itemName.innerText = data.name;
+
   /*------- Fill price's element -------*/
-  const itemPrice = document.getElementById("price");
   itemPrice.innerText = data.price;
 
   /*------- Fill description's element -------*/
-  const itemDescription = document.getElementById("description");
   itemDescription.innerText = data.description;
 }
 
@@ -53,7 +61,9 @@ function hydrateProductHTMLWithData(data) {
 function hydrateOptionWithData(data) {
   const itemSelector = document.querySelector("#colors");
   const colorsJson = data.colors;
+
   fillOption(itemSelector, colorsJson);
+
   function fillOption(itemSelector, colorsJson) {
     colorsJson.forEach((color) => {
       let colors = document.createElement("option");
@@ -89,35 +99,59 @@ function listenBtnToSendOnLocalStorage(data) {
     }
     if (quantity < 1 || quantity > 100) {
       return alert(`Veuillez choisir une quantité comprise entre 1 et 100`);
+    }
+
+    /* ------- Create item's object ------- */
+    let selectItem = {
+      id: data._id,
+      quantity: parseInt(quantity),
+      color: color,
+    };
+    console.log(selectItem);
+
+    /* ------ Get value stored in localstorage from "item" key ------- */
+    const localStorageContent = JSON.parse(localStorage.getItem("item")) ?? [];
+
+    /* ------ Check if object already exists in localstorage ------- */
+    const existingItem = localStorageContent.find(
+      (item) => item.id === selectItem.id && item.color === selectItem.color
+    );
+    if (existingItem) {
+      existingItem.quantity = parseInt(existingItem.quantity) + parseInt(quantity);
+      console.log(existingItem);
     } else {
-      /* ------- Create item's object ------- */
-      let selectItem = {
-        id: data._id,
-        quantity: parseInt(quantity),
-        color: color,
-      };
-      console.log(selectItem);
-
-      /* ------ Get value stored in localstorage from "item" key ------- */
-      const localStorageContent = JSON.parse(localStorage.getItem("item")) ?? [];
-
-      /* ------ Check if object already exists in localstorage ------- */
-      const existingItem = localStorageContent.find(
-        (item) => item.id === selectItem.id && item.color === selectItem.color
-      );
-      if (existingItem) {
-        existingItem.quantity = parseInt(existingItem.quantity) + parseInt(quantity);
-        console.log(existingItem);
-      } else {
-        localStorageContent.push(selectItem);
-      }
-      /* ------ Updating value in localstorage ------- */
-      localStorage.setItem("item", JSON.stringify(localStorageContent));
-      if (selectItem.quantity > 1) {
-        alert(`${selectItem.quantity} exemplaires ${data.name} ${selectItem.color} ont été ajoutés au panier.`);
-      } else {
-        alert(`${selectItem.quantity} exemplaire ${data.name} ${selectItem.color} a été ajouté au panier.`);
-      }
+      localStorageContent.push(selectItem);
+    }
+    /* ------ Updating value in localstorage ------- */
+    localStorage.setItem("item", JSON.stringify(localStorageContent));
+    if (selectItem.quantity > 1) {
+      alert(`${selectItem.quantity} exemplaires ${data.name} ${selectItem.color} ont été ajoutés au panier.`);
+    } else {
+      alert(`${selectItem.quantity} exemplaire ${data.name} ${selectItem.color} a été ajouté au panier.`);
     }
   });
+}
+
+/**
+ * Display error message when product data is not found
+ */
+function displayErrorMessage() {
+  const item = document.querySelector(".item");
+  item.innerHTML = "";
+
+  const errorMessageContainer = document.createElement("article");
+  item.appendChild(errorMessageContainer);
+
+  const errorMessage = document.createElement("h2");
+  errorMessage.innerText = "Désolé mais ce produit est indisponible, veuillez réessayer ultérieurement.";
+  errorMessageContainer.appendChild(errorMessage);
+
+  const buttonContainer = document.createElement("div");
+  buttonContainer.classList.add("item__content__addButton");
+  errorMessageContainer.appendChild(buttonContainer);
+
+  const redirectionBtn = document.createElement("a");
+  redirectionBtn.innerText = "Retourner à l'accueil.";
+  redirectionBtn.href = "./index.html";
+  buttonContainer.appendChild(redirectionBtn);
 }

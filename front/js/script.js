@@ -9,7 +9,8 @@ async function generateIndex() {
     loopToCreateHTMLSheetForEachProducts(data);
   } catch (err) {
     console.error(err);
-    alert(`Nous rencontrons un problème serveur, veulliez réessayer ultèrieurement.`);
+    const errorMessage = document.querySelector("h2");
+    errorMessage.innerText = "Désolé mais nos produits sont indisponibles, veuillez réessayer ultèrieurement.";
   }
 }
 
@@ -33,11 +34,24 @@ function loopToCreateHTMLSheetForEachProducts(data) {
 
     let productLink = document.createElement("a");
     productLink.href = `./product.html?id=${product._id}`;
-    productLink.innerHTML = `
-                            <article>
-                                <img src="${product.imageUrl}" alt="${product.altTxt}">
-                                <h3 class="productName">${product.name}</h3>
-                                <p class="productDescription">${product.description}<p>`;
     items.appendChild(productLink);
+
+    let productArticle = document.createElement("article");
+    productLink.appendChild(productArticle);
+
+    let productImage = document.createElement("img");
+    productImage.src = `${product.imageUrl}`;
+    productImage.alt = product.altTxt;
+    productArticle.appendChild(productImage);
+
+    let productName = document.createElement("h3");
+    productName.innerText = `${product.name}`;
+    productName.classList.add("productName");
+    productArticle.appendChild(productName);
+
+    let productDescription = document.createElement("p");
+    productDescription.innerText = `${product.description}`;
+    productDescription.classList.add("productDescription");
+    productArticle.appendChild(productDescription);
   }
 }
